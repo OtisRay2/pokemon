@@ -29,6 +29,9 @@ function setSolidStatus(message) {
   solidStatusEl.textContent = message;
 }
 
+const SOLID_CDN_ERROR_MESSAGE =
+  "Solid libraries konden niet geladen worden. Je netwerk of browser blokkeert waarschijnlijk externe CDN-modules.";
+
 async function ensureSolidLoaded() {
   if (solid) return solid;
 
@@ -64,9 +67,7 @@ async function ensureSolidLoaded() {
     solid = { auth, client, vocab };
     return solid;
   } catch (error) {
-    setSolidStatus(
-      "Solid libraries konden niet geladen worden. Probeer opnieuw of gebruik een andere browser/netwerkconfiguratie."
-    );
+    setSolidStatus(SOLID_CDN_ERROR_MESSAGE);
     throw error;
   }
 }
@@ -259,7 +260,7 @@ loginForm.addEventListener("submit", async (event) => {
       redirectUrl: window.location.href
     });
   } catch (error) {
-    setSolidStatus(`Inloggen mislukt: ${error.message}`);
+    setSolidStatus(error.message === SOLID_CDN_ERROR_MESSAGE ? error.message : `Inloggen mislukt: ${error.message}`);
   }
 });
 
