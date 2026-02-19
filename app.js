@@ -46,25 +46,21 @@ async function ensureSolidLoaded() {
       }
     }
 
-    console.error(`[Solid import error] ${moduleName}`, errors);
-    throw new Error(SOLID_CDN_ERROR_MESSAGE);
+    throw new Error(`Kon ${moduleName} niet laden via CDN fallback(s): ${errors.join(" | ")}`);
   }
 
   try {
     const auth = await importFromFallbacks("@inrupt/solid-client-authn-browser", [
       "https://esm.sh/@inrupt/solid-client-authn-browser@1.12.2?bundle",
-      "https://cdn.jsdelivr.net/npm/@inrupt/solid-client-authn-browser@1.12.2/+esm",
-      "https://unpkg.com/@inrupt/solid-client-authn-browser@1.12.2/dist/solid-client-authn.bundle.mjs"
+      "https://cdn.jsdelivr.net/npm/@inrupt/solid-client-authn-browser@1.12.2/+esm"
     ]);
     const client = await importFromFallbacks("@inrupt/solid-client", [
       "https://esm.sh/@inrupt/solid-client@1.21.1?bundle",
-      "https://cdn.jsdelivr.net/npm/@inrupt/solid-client@1.21.1/+esm",
-      "https://unpkg.com/@inrupt/solid-client@1.21.1/dist/index.browser.es.js"
+      "https://cdn.jsdelivr.net/npm/@inrupt/solid-client@1.21.1/+esm"
     ]);
     const vocab = await importFromFallbacks("@inrupt/vocab-common-rdf", [
       "https://esm.sh/@inrupt/vocab-common-rdf@1.0.5?bundle",
-      "https://cdn.jsdelivr.net/npm/@inrupt/vocab-common-rdf@1.0.5/+esm",
-      "https://unpkg.com/@inrupt/vocab-common-rdf@1.0.5/dist/index.es.js"
+      "https://cdn.jsdelivr.net/npm/@inrupt/vocab-common-rdf@1.0.5/+esm"
     ]);
 
     session = auth.getDefaultSession();
