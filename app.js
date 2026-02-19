@@ -32,10 +32,33 @@ function setSolidStatus(message) {
 async function ensureSolidLoaded() {
   if (solid) return solid;
 
+  async function importFromFallbacks(moduleName, urls) {
+    const errors = [];
+
+    for (const url of urls) {
+      try {
+        return await import(url);
+      } catch (error) {
+        errors.push(`${url} (${error?.message ?? error})`);
+      }
+    }
+
+    throw new Error(`Kon ${moduleName} niet laden via CDN fallback(s): ${errors.join(" | ")}`);
+  }
+
   try {
-    const auth = await import("https://esm.sh/@inrupt/solid-client-authn-browser@1.12.2?bundle");
-    const client = await import("https://esm.sh/@inrupt/solid-client@1.21.1?bundle");
-    const vocab = await import("https://esm.sh/@inrupt/vocab-common-rdf@1.0.5?bundle");
+    const auth = await importFromFallbacks("@inrupt/solid-client-authn-browser", [
+      "https://esm.sh/@inrupt/solid-client-authn-browser@1.12.2?bundle",
+      "https://cdn.jsdelivr.net/npm/@inrupt/solid-client-authn-browser@1.12.2/+esm"
+    ]);
+    const client = await importFromFallbacks("@inrupt/solid-client", [
+      "https://esm.sh/@inrupt/solid-client@1.21.1?bundle",
+      "https://cdn.jsdelivr.net/npm/@inrupt/solid-client@1.21.1/+esm"
+    ]);
+    const vocab = await importFromFallbacks("@inrupt/vocab-common-rdf", [
+      "https://esm.sh/@inrupt/vocab-common-rdf@1.0.5?bundle",
+      "https://cdn.jsdelivr.net/npm/@inrupt/vocab-common-rdf@1.0.5/+esm"
+    ]);
 
     session = auth.getDefaultSession();
     solid = { auth, client, vocab };
