@@ -29,21 +29,49 @@ function setSolidStatus(message) {
   solidStatusEl.textContent = message;
 }
 
+const SOLID_CDN_ERROR_MESSAGE =
+  "Solid libraries konden niet geladen worden. Je netwerk of browser blokkeert waarschijnlijk externe CDN-modules.";
+
 async function ensureSolidLoaded() {
   if (solid) return solid;
 
+  async function importFromFallbacks(moduleName, urls) {
+    const errors = [];
+
+    for (const url of urls) {
+      try {
+        return await import(url);
+      } catch (error) {
+        errors.push(`${url} (${error?.message ?? error})`);
+      }
+    }
+
+    console.error(`[Solid import error] ${moduleName}`, errors);
+    throw new Error(SOLID_CDN_ERROR_MESSAGE);
+  }
+
   try {
-    const auth = await import("https://esm.sh/@inrupt/solid-client-authn-browser@1.12.2?bundle");
-    const client = await import("https://esm.sh/@inrupt/solid-client@1.21.1?bundle");
-    const vocab = await import("https://esm.sh/@inrupt/vocab-common-rdf@1.0.5?bundle");
+    const auth = await importFromFallbacks("@inrupt/solid-client-authn-browser", [
+      "https://esm.sh/@inrupt/solid-client-authn-browser@1.12.2?bundle",
+      "https://cdn.jsdelivr.net/npm/@inrupt/solid-client-authn-browser@1.12.2/+esm",
+      "https://unpkg.com/@inrupt/solid-client-authn-browser@1.12.2/dist/solid-client-authn.bundle.mjs"
+    ]);
+    const client = await importFromFallbacks("@inrupt/solid-client", [
+      "https://esm.sh/@inrupt/solid-client@1.21.1?bundle",
+      "https://cdn.jsdelivr.net/npm/@inrupt/solid-client@1.21.1/+esm",
+      "https://unpkg.com/@inrupt/solid-client@1.21.1/dist/index.browser.es.js"
+    ]);
+    const vocab = await importFromFallbacks("@inrupt/vocab-common-rdf", [
+      "https://esm.sh/@inrupt/vocab-common-rdf@1.0.5?bundle",
+      "https://cdn.jsdelivr.net/npm/@inrupt/vocab-common-rdf@1.0.5/+esm",
+      "https://unpkg.com/@inrupt/vocab-common-rdf@1.0.5/dist/index.es.js"
+    ]);
 
     session = auth.getDefaultSession();
     solid = { auth, client, vocab };
     return solid;
   } catch (error) {
-    setSolidStatus(
-      "Solid libraries konden niet geladen worden. Probeer opnieuw of gebruik een andere browser/netwerkconfiguratie."
-    );
+    setSolidStatus(SOLID_CDN_ERROR_MESSAGE);
     throw error;
   }
 }
@@ -236,7 +264,7 @@ loginForm.addEventListener("submit", async (event) => {
       redirectUrl: window.location.href
     });
   } catch (error) {
-    setSolidStatus(`Inloggen mislukt: ${error.message}`);
+    setSolidStatus(error.message === SOLID_CDN_ERROR_MESSAGE ? error.message : `Inloggen mislukt: ${error.message}`);
   }
 });
 
