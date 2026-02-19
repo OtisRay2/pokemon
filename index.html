@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokédex + Solid POD</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="container">
+      <h1>Pokédex met Solid Linked Data</h1>
+      <p>
+        Zoek Pokémon via PokéAPI en sla favorieten op in je eigen Solid POD als linked data.
+      </p>
+    </header>
+
+    <main class="container layout">
+      <section class="card">
+        <h2>Zoek Pokémon</h2>
+        <form id="search-form">
+          <label for="pokemon-name">Naam of ID</label>
+          <div class="search-row">
+            <input id="pokemon-name" name="pokemon" placeholder="bijv. pikachu" required />
+            <button type="submit">Zoeken</button>
+          </div>
+        </form>
+        <p id="status" role="status"></p>
+
+        <article id="pokemon-card" class="pokemon-card hidden" aria-live="polite">
+          <img id="pokemon-image" alt="" />
+          <div>
+            <h3 id="pokemon-title"></h3>
+            <p><strong>Types:</strong> <span id="pokemon-types"></span></p>
+            <p><strong>Abilities:</strong> <span id="pokemon-abilities"></span></p>
+            <p><strong>Height:</strong> <span id="pokemon-height"></span> m</p>
+            <p><strong>Weight:</strong> <span id="pokemon-weight"></span> kg</p>
+            <button id="save-favorite" type="button" disabled>
+              Opslaan als favoriet in Solid POD
+            </button>
+          </div>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>Solid POD</h2>
+        <p>
+          Log in met een Solid identity provider. Favorieten worden bewaard in
+          <code>public/pokemon/favorites.ttl</code>.
+        </p>
+
+        <form id="login-form">
+          <label for="oidc-issuer">OIDC issuer</label>
+          <input
+            id="oidc-issuer"
+            type="url"
+            value="https://broker.pod.inrupt.com"
+            required
+          />
+          <button type="submit">Inloggen met Solid</button>
+        </form>
+
+        <div class="session-actions">
+          <button id="restore-session" type="button">Herstel sessie</button>
+          <button id="logout" type="button">Uitloggen</button>
+        </div>
+
+        <p id="solid-status">Niet ingelogd.</p>
+
+        <h3>Favorieten uit POD</h3>
+        <button id="load-favorites" type="button" disabled>Laad favorieten</button>
+        <ul id="favorites-list"></ul>
+      </section>
+    </main>
+
+    <footer class="container">
+      <small>Gebouwd voor GitHub Pages + GitHub Actions.</small>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
